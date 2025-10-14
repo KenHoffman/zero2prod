@@ -68,7 +68,7 @@ fn run(
             .app_data(db_pool.clone())
             .app_data(email_client.clone())
     })
-        .listen(listener)?
-        .run();
+    .listen(listener)?
+    .run();
     Ok(server)
 }
