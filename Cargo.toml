@@ -31,8 +31,8 @@ rand = { version= "0.8", features = ["std_rng"] }
 thiserror = "1.0.24"
 anyhow = "1.0.40"
 base64 = "0.22"
+sha3 = "0.10"
 
-# Using table-like toml syntax to avoid a super-long line!
 [dependencies.sqlx]
 version= "0.8"
 default-features = false
