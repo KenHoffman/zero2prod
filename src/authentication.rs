@@ -1,7 +1,7 @@
 use crate::telemetry::spawn_blocking_with_tracing;
 use anyhow::Context;
-use secrecy::{Secret, ExposeSecret};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
 
 pub struct Credentials {
@@ -31,8 +31,7 @@ CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno"
     );
     //if let Some(/* */)= get_stored_credentials(/* */).await?
     if let Some((stored_user_id, stored_password_hash)) =
-        get_stored_credentials(&credentials.username, &pool)
-            .await?
+        get_stored_credentials(&credentials.username, &pool).await?
     {
         user_id = Some(stored_user_id);
         expected_password_hash = stored_password_hash;
@@ -41,13 +40,12 @@ CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno"
     spawn_blocking_with_tracing(move || {
         verify_password_hash(expected_password_hash, credentials.password)
     })
-        .await
-        .context("Failed to spawn blocking task.")??;
+    .await
+    .context("Failed to spawn blocking task.")??;
 
     user_id
         .ok_or_else(|| anyhow::anyhow!("Unknown username."))
         .map_err(AuthError::InvalidCredentials)
-
 }
 
 #[tracing::instrument(
@@ -84,9 +82,9 @@ WHERE username = $1
 "#,
         username,
     )
-        .fetch_optional(pool)
-        .await
-        .context("Failed to perform a query to retrieve stored credentials.")?
-        .map(|row| (row.user_id, Secret::new(row.password_hash)));
+    .fetch_optional(pool)
+    .await
+    .context("Failed to perform a query to retrieve stored credentials.")?
+    .map(|row| (row.user_id, Secret::new(row.password_hash)));
     Ok(row)
 }

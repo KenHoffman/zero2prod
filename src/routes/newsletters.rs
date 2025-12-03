@@ -1,4 +1,4 @@
-use crate::authentication::{AuthError, Credentials, validate_credentials}  ;
+use crate::authentication::{validate_credentials, AuthError, Credentials};
 use crate::domain::SubscriberEmail;
 use crate::email_client::EmailClient;
 use crate::routes::error_chain_fmt;
@@ -72,7 +72,7 @@ pub async fn publish_newsletter(
 ) -> Result<HttpResponse, PublishError> {
     let credentials = basic_authentication(request.headers()).map_err(PublishError::AuthError)?;
     tracing::Span::current().record("username", tracing::field::display(&credentials.username));
-    let user_id= validate_credentials(credentials, &pool)
+    let user_id = validate_credentials(credentials, &pool)
         .await
         // We match on `AuthError`'s variants, but we pass the **whole** error
         // into the constructors for `PublishError` variants. This ensures that
@@ -167,4 +167,3 @@ async fn get_confirmed_subscribers(
     .collect();
     Ok(confirmed_subscribers)
 }
-
