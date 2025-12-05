@@ -2,14 +2,14 @@ use crate::authentication::AuthError;
 use crate::authentication::{validate_credentials, Credentials};
 use crate::routes::error_chain_fmt;
 use crate::startup::HmacSecret;
+use actix_web::error::InternalError;
 use actix_web::http::header::LOCATION;
 use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
 use actix_web::{web, ResponseError};
-use actix_web::error::InternalError;
 use hmac::{Hmac, Mac};
-use secrecy::Secret;
 use secrecy::ExposeSecret;
+use secrecy::Secret;
 use sqlx::PgPool;
 
 #[derive(serde::Deserialize)]
@@ -35,8 +35,7 @@ pub async fn login(
     tracing::Span::current().record("username", tracing::field::display(&credentials.username));
     match validate_credentials(credentials, &pool).await {
         Ok(user_id) => {
-            tracing::Span::current()
-                .record("user_id", tracing::field::display(&user_id));
+            tracing::Span::current().record("user_id", tracing::field::display(&user_id));
             // HttpResponse::SeeOther()
             //     .insert_header((LOCATION, "/"))
             //     .finish()
@@ -47,18 +46,13 @@ pub async fn login(
         Err(e) => {
             let e = match e {
                 AuthError::InvalidCredentials(_) => LoginError::AuthError(e.into()),
-                AuthError::UnexpectedError(_) => {
-                    LoginError::UnexpectedError(e.into())
-                },
+                AuthError::UnexpectedError(_) => LoginError::UnexpectedError(e.into()),
             };
-            let query_string= format!(
-                "error={}",
-                urlencoding::Encoded::new(e.to_string())
-            );
-            let hmac_tag= {
-                let mut mac = Hmac::<sha2::Sha256>::new_from_slice(
-                    secret.0.expose_secret().as_bytes()
-                ).unwrap();
+            let query_string = format!("error={}", urlencoding::Encoded::new(e.to_string()));
+            let hmac_tag = {
+                let mut mac =
+                    Hmac::<sha2::Sha256>::new_from_slice(secret.0.expose_secret().as_bytes())
+                        .unwrap();
                 mac.update(query_string.as_bytes());
                 mac.finalize().into_bytes()
             };
