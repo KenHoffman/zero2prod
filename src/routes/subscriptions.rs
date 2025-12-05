@@ -4,11 +4,11 @@ use crate::startup::ApplicationBaseUrl;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse, ResponseError};
 use anyhow::Context;
-use chrono::Utc;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{Executor, PgPool, Postgres, Transaction};
 use std::convert::{TryFrom, TryInto};
+use chrono::Utc;
 use uuid::Uuid;
 
 #[derive(serde::Deserialize)]
