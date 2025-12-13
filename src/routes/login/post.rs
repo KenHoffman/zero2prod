@@ -1,5 +1,4 @@
-use crate::authentication::AuthError;
-use crate::authentication::{validate_credentials, Credentials};
+use crate::authentication::{validate_credentials, AuthError, Credentials};
 use crate::routes::error_chain_fmt;
 use crate::session_state::TypedSession;
 use actix_web::error::InternalError;
